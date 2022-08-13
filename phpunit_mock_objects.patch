@@ -4,7 +4,7 @@ index 3df3abb..fc76d5d 100644
 +++ b/src/Framework/MockObject/Generator.php
 @@ -1031,16 +1031,29 @@ protected function getMethodParameters(ReflectionMethod $method, $forCall = fals
              $typeDeclaration = '';
-
+ 
              if (!$forCall) {
 +                if (PHP_VERSION_ID >= 80000) {
 +                    $isArray = $parameter->getType() && $parameter->getType()->getName() === 'array';

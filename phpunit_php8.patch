@@ -37,3 +37,57 @@ index b48f354cd..d59cdeea7 100644
  {
     return true;
  }
+--- a/src/Util/Configuration.php
++++ b/src/Util/Configuration.php
+@@ -511,25 +511,20 @@
+                 define($name, $value);
+             }
+         }
++        
++        foreach ($configuration['var'] as $name => $data) {
++            $GLOBALS[$name] = $data['value'];
++        }
+ 
+-        foreach (array('var', 'post', 'get', 'cookie', 'server', 'files', 'request') as $array) {
+-            // See https://github.com/sebastianbergmann/phpunit/issues/277
+-            switch ($array) {
+-                case 'var':
+-                    $target = &$GLOBALS;
+-                    break;
+-
+-                case 'server':
+-                    $target = &$_SERVER;
+-                    break;
++        foreach ($configuration['server'] as $name => $data) {
++            $_SERVER[$name] = $data['value'];
++        }
+ 
+-                default:
+-                    $target = &$GLOBALS['_' . strtoupper($array)];
+-                    break;
+-            }
++        foreach (array('post', 'get', 'cookie', 'files', 'request') as $array) {
++            $target = &$GLOBALS['_' . strtoupper($array)];
+ 
+-            foreach ($configuration[$array] as $name => $value) {
+-                $target[$name] = $value;
++            foreach ($configuration[$array] as $name => $data) {
++                $target[$name] = $data['value'];
+             }
+         }
+ 
+--- a/src/Util/GlobalState.php
++++ b/src/Util/GlobalState.php
+@@ -65,6 +65,12 @@
+                 continue;
+             }
+
++            // Skip /phpunit/phpunit/phpunit that is incorrectly included when calling phpunit from vendor/bin/phpunit with Composer 2 on PHP 8.0+
++            // Fixes https://github.com/yiisoft/phpunit-patches/issues/7
++            if (preg_match('#/phpunit/phpunit/phpunit$#', str_replace('\\', '/', $file))) {
++                continue;
++            }
++
+             if (!$blacklist->isBlacklisted($file) && is_file($file)) {
+                 $result = 'require_once \'' . $file . "';\n" . $result;
+             }
