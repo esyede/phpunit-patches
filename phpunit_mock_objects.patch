@@ -1,26 +1,26 @@
-diff --git a/vendor/phpunit/phpunit/src/Framework/TestResult.php b/vendor/phpunit/phpunit/src/Framework/TestResult.php
-index ac94c98..b6e090a 100644
---- a/vendor/phpunit/phpunit/src/Framework/TestResult.php
-+++ b/vendor/phpunit/phpunit/src/Framework/TestResult.php
+diff --git a/phpunit/src/Framework/TestResult.php b/phpunit/src/Framework/TestResult.php
+index ac94c98..3ffcb6a 100644
+--- a/phpunit/src/Framework/TestResult.php
++++ b/phpunit/src/Framework/TestResult.php
 @@ -556,7 +556,7 @@ public function run(PHPUnit_Framework_Test $test)
          if ($this->convertErrorsToExceptions) {
              $oldErrorHandler = set_error_handler(
                  array('PHPUnit_Util_ErrorHandler', 'handleError'),
 -                E_ALL | E_STRICT
-+                E_ALL | (defined('E_STRICT') ? E_STRICT : 2048)
++                E_ALL | 2048
              );
  
              if ($oldErrorHandler === null) {
-diff --git a/vendor/phpunit/phpunit/src/Util/ErrorHandler.php b/vendor/phpunit/phpunit/src/Util/ErrorHandler.php
-index d75d1be..0ff1f20 100644
---- a/vendor/phpunit/phpunit/src/Util/ErrorHandler.php
-+++ b/vendor/phpunit/phpunit/src/Util/ErrorHandler.php
+diff --git a/phpunit/src/Util/ErrorHandler.php b/phpunit/src/Util/ErrorHandler.php
+index d75d1be..6ea66ce 100644
+--- a/phpunit/src/Util/ErrorHandler.php
++++ b/phpunit/src/Util/ErrorHandler.php
 @@ -60,7 +60,7 @@ public static function handleError($errno, $errstr, $errfile, $errline)
              }
          }
  
 -        if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == E_STRICT) {
-+    if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == E_STRICT) {
++        if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == 2048) {
              if (PHPUnit_Framework_Error_Notice::$enabled !== true) {
                  return false;
              }
