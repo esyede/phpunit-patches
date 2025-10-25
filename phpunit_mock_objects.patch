@@ -1,38 +1,26 @@
-diff --git a/src/Framework/MockObject/Generator.php b/src/Framework/MockObject/Generator.php
-index 3df3abb..fc76d5d 100644
---- a/src/Framework/MockObject/Generator.php
-+++ b/src/Framework/MockObject/Generator.php
-@@ -1031,16 +1031,29 @@ protected function getMethodParameters(ReflectionMethod $method, $forCall = fals
-             $typeDeclaration = '';
+diff --git a/vendor/phpunit/phpunit/src/Framework/TestResult.php b/vendor/phpunit/phpunit/src/Framework/TestResult.php
+index ac94c98..b6e090a 100644
+--- a/vendor/phpunit/phpunit/src/Framework/TestResult.php
++++ b/vendor/phpunit/phpunit/src/Framework/TestResult.php
+@@ -556,7 +556,7 @@ public function run(PHPUnit_Framework_Test $test)
+         if ($this->convertErrorsToExceptions) {
+             $oldErrorHandler = set_error_handler(
+                 array('PHPUnit_Util_ErrorHandler', 'handleError'),
+-                E_ALL | E_STRICT
++                E_ALL | (defined('E_STRICT') ? E_STRICT : 2048)
+             );
  
-             if (!$forCall) {
-+                if (PHP_VERSION_ID >= 80000) {
-+                    $isArray = $parameter->getType() && $parameter->getType()->getName() === 'array';
-+                    $isCallable = $parameter->getType() && $parameter->getType()->getName() === 'callable';
-+                } else {
-+                    $isArray = $parameter->isArray();
-+                    $isCallable = version_compare(PHP_VERSION, '5.4.0', '>=') ? $parameter->isCallable() : false;
-+                }
-+
-                 if ($this->hasType($parameter)) {
--                    $typeDeclaration = (string) $parameter->getType() . ' ';
--                } elseif ($parameter->isArray()) {
-+                    $type = $parameter->getType();
-+                    $typeDeclaration = (PHP_VERSION_ID >= 70100 ? $type->getName() : (string) $type) . ' ';
-+                } elseif ($isArray) {
-                     $typeDeclaration = 'array ';
-                 } elseif ((defined('HHVM_VERSION') || version_compare(PHP_VERSION, '5.4.0', '>='))
--                          && $parameter->isCallable()) {
-+                          && $isCallable) {
-                     $typeDeclaration = 'callable ';
-                 } else {
-                     try {
--                        $class = $parameter->getClass();
-+                        if (PHP_VERSION_ID >= 80000) {
-+                            $class = $parameter->getType();
-+                        } else {
-+                            $class = $parameter->getClass();
-+                        }
-                     } catch (ReflectionException $e) {
-                         throw new PHPUnit_Framework_MockObject_RuntimeException(
-                             sprintf(
+             if ($oldErrorHandler === null) {
+diff --git a/vendor/phpunit/phpunit/src/Util/ErrorHandler.php b/vendor/phpunit/phpunit/src/Util/ErrorHandler.php
+index d75d1be..0ff1f20 100644
+--- a/vendor/phpunit/phpunit/src/Util/ErrorHandler.php
++++ b/vendor/phpunit/phpunit/src/Util/ErrorHandler.php
+@@ -60,7 +60,7 @@ public static function handleError($errno, $errstr, $errfile, $errline)
+             }
+         }
+ 
+-        if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == E_STRICT) {
++    if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == E_STRICT) {
+             if (PHPUnit_Framework_Error_Notice::$enabled !== true) {
+                 return false;
+             }
