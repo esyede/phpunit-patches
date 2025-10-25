@@ -1,18 +1,26 @@
-diff --git a/src/Util/ErrorHandler.php b/src/Util/ErrorHandler.php
---- a/src/Util/ErrorHandler.php
-+++ b/src/Util/ErrorHandler.php
-@@
--        if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == 2048) {
-+        // Avoid referencing E_STRICT constant directly (deprecated in PHP 8.4).
-+        // Use a defined fallback to remain compatible across PHP 5.4..8.4.
-+        if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == (defined('E_STRICT') ? E_STRICT : 2048)) {
-@@
--diff --git a/src/Framework/TestResult.php b/src/Framework/TestResult.php
+diff --git a/src/Framework/TestResult.php b/src/Framework/TestResult.php
+index ac94c98..b6e090a 100644
 --- a/src/Framework/TestResult.php
 +++ b/src/Framework/TestResult.php
-@@
--                array('PHPUnit_Util_ErrorHandler', 'handleError'),
+@@ -556,7 +556,7 @@ public function run(PHPUnit_Framework_Test $test)
+         if ($this->convertErrorsToExceptions) {
+             $oldErrorHandler = set_error_handler(
+                 array('PHPUnit_Util_ErrorHandler', 'handleError'),
 -                E_ALL | E_STRICT
-+                array('PHPUnit_Util_ErrorHandler', 'handleError'),
 +                E_ALL | (defined('E_STRICT') ? E_STRICT : 2048)
-*** End Patch
+             );
+ 
+             if ($oldErrorHandler === null) {
+diff --git a/src/Util/ErrorHandler.php b/src/Util/ErrorHandler.php
+index d75d1be..0ff1f20 100644
+--- a/src/Util/ErrorHandler.php
++++ b/src/Util/ErrorHandler.php
+@@ -60,7 +60,7 @@ public static function handleError($errno, $errstr, $errfile, $errline)
+             }
+         }
+ 
+-        if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == E_STRICT) {
++    if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == E_STRICT) {
+             if (PHPUnit_Framework_Error_Notice::$enabled !== true) {
+                 return false;
+             }
