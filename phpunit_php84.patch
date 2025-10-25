@@ -2,8 +2,17 @@ diff --git a/src/Util/ErrorHandler.php b/src/Util/ErrorHandler.php
 --- a/src/Util/ErrorHandler.php
 +++ b/src/Util/ErrorHandler.php
 @@
--        if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == E_STRICT) {
+-        if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == 2048) {
 +        // Avoid referencing E_STRICT constant directly (deprecated in PHP 8.4).
-+        // Use its historical numeric value to remain compatible across PHP 5.4..8.4.
-+        if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == 2048) {
-
++        // Use a defined fallback to remain compatible across PHP 5.4..8.4.
++        if ($errno == E_NOTICE || $errno == E_USER_NOTICE || $errno == (defined('E_STRICT') ? E_STRICT : 2048)) {
+@@
+-diff --git a/src/Framework/TestResult.php b/src/Framework/TestResult.php
+--- a/src/Framework/TestResult.php
++++ b/src/Framework/TestResult.php
+@@
+-                array('PHPUnit_Util_ErrorHandler', 'handleError'),
+-                E_ALL | E_STRICT
++                array('PHPUnit_Util_ErrorHandler', 'handleError'),
++                E_ALL | (defined('E_STRICT') ? E_STRICT : 2048)
+*** End Patch
